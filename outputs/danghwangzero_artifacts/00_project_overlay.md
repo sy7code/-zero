@@ -1,6 +1,23 @@
 # 당황Zero Project Overlay
 
-범용 하네스에 덧씌우는 프로젝트별 실행 규칙이다. 구현 중 판단이 갈리면 이 파일을 우선 확인한다.
+범용 하네스에 덧씌우는 프로젝트별 작업 틀이다. 이 문서는 최종 확정 계획이 아니라, 현재까지의 자료와 사용자 요청을 바탕으로 만든 기본안이다. 구현 중 판단이 갈리면 `14_decision_status_register.md`를 먼저 확인한다.
+
+## 0. Decision Status
+
+확정:
+
+- Flutter 앱 프로토타입으로 진행한다.
+- 앱은 사고 판단이 아니라 초기 대응 보조에 집중한다.
+- 과실, 법적 책임, 신고 필요 여부는 확정하지 않는다.
+
+조정 가능:
+
+- Hive, FastAPI, OpenCV, Cloud Vision, 보조 모델은 현재 기본안 또는 후보이며 팀 역량과 실험 결과에 따라 바꿀 수 있다.
+- 화면 세부 디자인은 3차 이미지를 기준으로 하되, 실제 구현 난이도에 따라 조정할 수 있다.
+
+현재 결정 불가:
+
+- 최종 발표 방식, 외부 API 계정/비용, 공식 체크리스트 문구, 실제 사진 사용 여부는 팀 확인 없이는 확정하지 않는다.
 
 ## 1. Project Summary
 
@@ -14,15 +31,15 @@
 
 ## 2. Tech Stack
 
-Frontend: Flutter, Dart
+Frontend: Flutter, Dart, 현재 기본안
 
-Local data: Hive, app documents directory
+Local data: Hive, app documents directory, 조정 가능
 
-Device APIs: camera, geolocator, flutter_tts, share_plus, permission_handler
+Device APIs: camera, geolocator, flutter_tts, share_plus, permission_handler, 조정 가능
 
-Backend: FastAPI, Pydantic
+Backend: FastAPI, Pydantic, 후보
 
-CV/AI: Pillow, OpenCV, Google Cloud Vision 후보, 보조 모델 후보, mock/replay adapter
+CV/AI: Pillow, OpenCV, Google Cloud Vision 후보, 보조 모델 후보, mock/replay adapter, 검증 후 결정
 
 Rules and scenarios: PyYAML, rule engine, scenario YAML
 
@@ -115,10 +132,9 @@ Google Cloud Vision 후보:
 ## 7. Feature Flags
 
 ```text
-VITE_ENABLE_VISION=false
-VITE_ENABLE_REPLAY=true
-VITE_ENABLE_TTS=true
 ENABLE_REAL_VISION=false
+ENABLE_REPLAY=true
+ENABLE_TTS=true
 ENABLE_ASSISTANT_MODEL=false
 ```
 
