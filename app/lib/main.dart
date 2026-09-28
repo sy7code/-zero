@@ -10,6 +10,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 
 const _uuid = Uuid();
+const _brandColor = Color(0xffdf4b32);
+const _dangerColor = Color(0xffb42318);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +29,8 @@ class DanghwangZeroApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: '당황Zero',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xffdf4b32)),
+        scaffoldBackgroundColor: const Color(0xfffbfaf7),
+        colorScheme: ColorScheme.fromSeed(seedColor: _brandColor),
         useMaterial3: true,
       ),
       home: const PrototypeHome(),
@@ -53,9 +56,42 @@ class _PrototypeHomeState extends State<PrototypeHome> {
   final Map<String, String> _photoSlots = {};
   final List<String> _log = [];
 
+  @override
+  void initState() {
+    super.initState();
+    final saved = _box.get('active_accident');
+    if (saved is Map) {
+      _accident = Map<String, dynamic>.from(saved);
+      final savedAnswers = _accident?['answers'];
+      final savedSlots = _accident?['photo_slots'];
+      final savedLog = _accident?['log'];
+      if (savedAnswers is Map) {
+        _answers.addAll(
+          savedAnswers.map((key, value) => MapEntry('$key', '$value')),
+        );
+      }
+      if (savedSlots is Map) {
+        _photoSlots.addAll(
+          savedSlots.map((key, value) => MapEntry('$key', '$value')),
+        );
+      }
+      if (savedLog is List) {
+        _log.addAll(savedLog.map((item) => '$item'));
+      }
+      _step = 5;
+    }
+  }
+
   List<String> get _missingSlots {
     const required = ['scene_wide', 'my_damage', 'other_plate', 'road_sign'];
-    return required.where((slot) => _photoSlots[slot] != 'done').toList();
+    return required.where((slot) => _photoSlots[slot] == null).toList();
+  }
+
+  List<String> get _skippedSlots {
+    return _photoSlots.entries
+        .where((entry) => entry.value == 'skipped')
+        .map((entry) => entry.key)
+        .toList();
   }
 
   String get _situationLabel {
@@ -115,7 +151,20 @@ class _PrototypeHomeState extends State<PrototypeHome> {
     setState(() {
       _answers[key] = value;
       _log.add('$key=$value');
-      if (_step < 4) _step += 1;
+      if (key == 'injury' && value != 'no') {
+        _step = 6;
+      } else if (_step < 4) {
+        _step += 1;
+      }
+    });
+    await _saveState();
+  }
+
+  Future<void> _skipSlot(String slot) async {
+    setState(() {
+      _photoSlots[slot] = 'skipped';
+      _log.add('photo:$slot skipped');
+      if (_missingSlots.isEmpty) _step = 5;
     });
     await _saveState();
   }
@@ -161,6 +210,7 @@ class _PrototypeHomeState extends State<PrototypeHome> {
     if (_step == 4 && _missingSlots.isNotEmpty) {
       return _slotLabel(_missingSlots.first);
     }
+    if (_step == 6) return '긴급 상황은 직접 신고해 주세요.';
     return '사고 기록 카드를 확인하세요.';
   }
 
@@ -201,12 +251,24 @@ class _PrototypeHomeState extends State<PrototypeHome> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const _PrototypeHero(),
+        const SizedBox(height: 20),
         const Text(
           '교통사고 직후, 다음 행동을 하나씩 안내합니다.',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 12),
         const Text('기록은 이 기기에 저장되고, AI는 판단이 아니라 관찰 후보만 돕습니다.'),
+        const SizedBox(height: 14),
+        const Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _TagChip(label: '버튼만 누르는 대응'),
+            _TagChip(label: '사진은 관찰 기록으로'),
+            _TagChip(label: '기록은 내 폰에만'),
+          ],
+        ),
         const SizedBox(height: 24),
         FilledButton.icon(
           onPressed: _startAccident,
@@ -227,7 +289,7 @@ class _PrototypeHomeState extends State<PrototypeHome> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        LinearProgressIndicator(value: (_step.clamp(1, 5)) / 5),
+        _StageRail(activeStep: _step),
         const SizedBox(height: 16),
         Text(
           _nextActionText(),
@@ -241,21 +303,36 @@ class _PrototypeHomeState extends State<PrototypeHome> {
 
   Widget _buildStep() {
     if (_step == 1) {
-      return _ChoiceStep(
-        options: const {'yes': '있음', 'no': '없음', 'unknown': '모름'},
-        onSelected: (value) => _answer('injury', value),
+      return _QuestionCard(
+        eyebrow: '01 안전 확인',
+        title: '다친 사람이 있나요?',
+        helper: '있음 또는 모름이면 긴급 화면을 먼저 보여줍니다.',
+        child: _ChoiceStep(
+          options: const {'yes': '있음', 'no': '없음', 'unknown': '모름'},
+          onSelected: (value) => _answer('injury', value),
+        ),
       );
     }
     if (_step == 2) {
-      return _ChoiceStep(
-        options: const {'yes': '있음', 'no': '없음', 'unknown': '모름'},
-        onSelected: (value) => _answer('other_vehicle', value),
+      return _QuestionCard(
+        eyebrow: '02 쉬운 질문',
+        title: '다른 차량이 관련되어 있나요?',
+        helper: 'AI가 후보를 미리 고르더라도 사용자가 1탭으로 확인합니다.',
+        child: _ChoiceStep(
+          options: const {'yes': '있음', 'no': '없음', 'unknown': '모름'},
+          onSelected: (value) => _answer('other_vehicle', value),
+        ),
       );
     }
     if (_step == 3) {
-      return _ChoiceStep(
-        options: const {'yes': '있음', 'no': '없음', 'unknown': '모름'},
-        onSelected: (value) => _answer('facility', value),
+      return _QuestionCard(
+        eyebrow: '03 쉬운 질문',
+        title: '표지판, 가드레일 같은 시설물이 파손되었나요?',
+        helper: '판단이 어려우면 모름을 눌러도 다음 기록으로 이어집니다.',
+        child: _ChoiceStep(
+          options: const {'yes': '있음', 'no': '없음', 'unknown': '모름'},
+          onSelected: (value) => _answer('facility', value),
+        ),
       );
     }
     if (_step == 4) {
@@ -268,21 +345,20 @@ class _PrototypeHomeState extends State<PrototypeHome> {
           ),
         );
       }
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      return ListView(
         children: [
           _InfoPanel(
-            title: '상황 후보',
+            title: 'AI가 미리 고른 답',
             child: Text(_situationLabel),
           ),
           const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () => _capture(slot),
-            icon: const Icon(Icons.camera_alt),
-            label: Text(_slotLabel(slot)),
+          _CaptureGuide(
+            title: _slotLabel(slot),
+            reason: '보험 처리에 필요한 관찰 기록을 남기기 위해 필요합니다.',
+            onCapture: () => _capture(slot),
           ),
           TextButton(
-            onPressed: () => _answer('skip_$slot', 'yes'),
+            onPressed: () => _skipSlot(slot),
             child: const Text('지금은 건너뛰기'),
           ),
           const SizedBox(height: 12),
@@ -290,9 +366,15 @@ class _PrototypeHomeState extends State<PrototypeHome> {
         ],
       );
     }
+    if (_step == 6) {
+      return _EmergencyPanel(
+        onContinue: () => setState(() => _step = 4),
+      );
+    }
     return _SummaryCard(
       situation: _situationLabel,
       missing: _missingSlots,
+      skipped: _skippedSlots,
       log: _log,
       onShare: _shareSummary,
       onReset: () async {
@@ -305,6 +387,253 @@ class _PrototypeHomeState extends State<PrototypeHome> {
           _log.clear();
         });
       },
+    );
+  }
+}
+
+class _PrototypeHero extends StatelessWidget {
+  const _PrototypeHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: _brandColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '버튼만 누르는 대응',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '사진은 관찰 기록으로, 기록은 내 폰에만.',
+              style: TextStyle(color: Colors.white, fontSize: 15),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TagChip extends StatelessWidget {
+  const _TagChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
+}
+
+class _StageRail extends StatelessWidget {
+  const _StageRail({required this.activeStep});
+
+  final int activeStep;
+
+  @override
+  Widget build(BuildContext context) {
+    final labels = ['안전', '질문', '후보', '촬영', '기록'];
+    final normalized = activeStep == 6 ? 1 : activeStep.clamp(1, 5);
+    return Row(
+      children: [
+        for (var i = 0; i < labels.length; i++)
+          Expanded(
+            child: Container(
+              height: 34,
+              margin: EdgeInsets.only(right: i == labels.length - 1 ? 0 : 6),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: i + 1 <= normalized
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+              ),
+              child: Text(
+                labels[i],
+                style: TextStyle(
+                  color: i + 1 <= normalized ? Colors.white : Colors.black87,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _QuestionCard extends StatelessWidget {
+  const _QuestionCard({
+    required this.eyebrow,
+    required this.title,
+    required this.helper,
+    required this.child,
+  });
+
+  final String eyebrow;
+  final String title;
+  final String helper;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        Text(
+          eyebrow,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.primary,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 8),
+        Text(helper),
+        const SizedBox(height: 20),
+        child,
+      ],
+    );
+  }
+}
+
+class _CaptureGuide extends StatelessWidget {
+  const _CaptureGuide({
+    required this.title,
+    required this.reason,
+    required this.onCapture,
+  });
+
+  final String title;
+  final String reason;
+  final VoidCallback onCapture;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Theme.of(context).colorScheme.primary),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Center(
+                  child: Icon(Icons.center_focus_strong, size: 48),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 4),
+            Text(reason),
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: onCapture,
+              icon: const Icon(Icons.camera_alt),
+              label: const Text('촬영하기'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmergencyPanel extends StatelessWidget {
+  const _EmergencyPanel({required this.onContinue});
+
+  final VoidCallback onContinue;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: _dangerColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  '긴급 확인 필요',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '전화는 자동으로 걸지 않습니다. 사용자가 직접 눌러 연결합니다.',
+                  style: TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: _dangerColor,
+                  ),
+                  onPressed: () {},
+                  icon: const Icon(Icons.call),
+                  label: const Text('119 / 112 직접 전화'),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        OutlinedButton(
+          onPressed: onContinue,
+          child: const Text('신고 후 기록 계속하기'),
+        ),
+      ],
     );
   }
 }
@@ -364,6 +693,7 @@ class _SummaryCard extends StatelessWidget {
   const _SummaryCard({
     required this.situation,
     required this.missing,
+    required this.skipped,
     required this.log,
     required this.onShare,
     required this.onReset,
@@ -371,6 +701,7 @@ class _SummaryCard extends StatelessWidget {
 
   final String situation;
   final List<String> missing;
+  final List<String> skipped;
   final List<String> log;
   final VoidCallback onShare;
   final VoidCallback onReset;
@@ -386,6 +717,7 @@ class _SummaryCard extends StatelessWidget {
             children: [
               Text('상황 후보: $situation'),
               Text('누락 사진: ${missing.isEmpty ? '없음' : missing.join(', ')}'),
+              Text('건너뛴 사진: ${skipped.isEmpty ? '없음' : skipped.join(', ')}'),
               const SizedBox(height: 12),
               const Text('주의: 과실, 법적 책임, 신고 필요 여부는 확정하지 않습니다.'),
             ],

@@ -29,6 +29,7 @@
 - `10_team_collaboration_ownership.md`: 4인 팀 작업 소유권과 변경 권한
 - `11_data_contracts_mock_replay.md`: PhotoFacts, NextAction, mock, replay, 시나리오 검증 계약
 - `12_implementation_roadmap.md`: M0-M4 구현 로드맵과 품질 게이트
+- `13_prototype_visual_reference.md`: 3차 데모 화면 기준과 Flutter 반영 상태
 
 ## 구현 시작 전 Gate
 
