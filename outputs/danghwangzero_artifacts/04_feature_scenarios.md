@@ -13,13 +13,13 @@
 1. 사용자가 홈에서 내 차량 정보 등록을 선택한다.
 2. 차량번호, 차종, 보험사, 긴급 연락처를 입력한다.
 3. 저장 버튼을 누른다.
-4. 백엔드가 차량 정보를 저장한다.
+4. 앱이 차량 정보를 Hive에 저장한다.
 5. 홈에 등록된 차량 정보가 표시된다.
 
 실패 흐름:
 
 - 필수값이 비어 있으면 저장하지 않고 해당 필드를 안내한다.
-- 서버 저장 실패 시 재시도 버튼을 보여준다.
+- 로컬 저장 실패 시 재시도 버튼을 보여준다.
 
 저장 데이터:
 
@@ -30,10 +30,9 @@
 - S-01 홈
 - S-02 사전 정보 등록
 
-관련 API:
+데이터/호출:
 
-- `POST /vehicles`
-- `GET /vehicles`
+- Hive `vehicles`
 
 완료 기준:
 
@@ -52,7 +51,7 @@
 1. 사용자가 홈에서 사고 대응 시작을 누른다.
 2. 앱이 현재 시간과 위치를 가져온다.
 3. 앱이 등록된 차량 정보를 표시한다.
-4. 백엔드가 사고 기록을 생성한다.
+4. 앱이 Hive에 사고 기록을 생성한다.
 5. 앱이 다친 사람 여부와 현장 위험 여부를 묻는다.
 6. 사용자가 `없음` 또는 `비교적 안전함`을 선택한다.
 7. 앱이 단계형 상황 파악 화면으로 이동한다.
@@ -60,7 +59,7 @@
 실패 흐름:
 
 - 위치 권한 거부 시 수동 위치 입력을 제공한다.
-- 사고 기록 생성 실패 시 재시도 버튼을 표시한다.
+- 로컬 사고 기록 생성 실패 시 재시도 버튼을 표시한다.
 - 다친 사람이 있거나 잘 모르겠으면 긴급 안내 화면과 119/112 버튼을 표시한다.
 - 앱은 전화나 신고를 자동 실행하지 않고 사용자가 버튼을 누를 때만 연결한다.
 
@@ -73,10 +72,12 @@
 - S-01 홈
 - S-03 사고 대응 시작
 
-관련 API:
+데이터/호출:
 
-- `POST /accidents`
-- `POST /accidents/{accident_id}/triage-answers`
+- geolocator
+- Hive `accidents`
+- Hive `triage_answers`
+- optional `POST /next-action`
 
 완료 기준:
 
@@ -115,10 +116,11 @@
 - S-04 단계형 상황 파악
 - S-05 상황 후보 확인
 
-관련 API:
+데이터/호출:
 
-- `POST /accidents/{accident_id}/triage-answers`
-- `GET /accidents/{accident_id}/situation`
+- Hive `triage_answers`
+- Hive `situation_candidates`
+- local decision core 또는 `POST /next-action`
 
 완료 기준:
 
@@ -137,14 +139,14 @@
 1. 앱이 현재 가장 중요한 사진 항목 1개를 보여준다.
 2. 사용자가 사진을 촬영하거나 업로드한다.
 3. 적용된 경우 전처리 모듈이 회전, 크기, 밝기, 흔들림을 검사한다.
-4. 백엔드가 사진을 Storage에 저장한다.
-5. DB에 사진 path와 사진 항목이 저장된다.
+4. 앱이 사진 파일을 앱 문서 디렉터리에 저장하고 참조와 사진 항목을 Hive에 저장한다.
+5. 적용된 경우 FastAPI가 품질 결과와 PhotoFacts 후보를 반환한다.
 6. CV 또는 mock PhotoFacts가 있으면 사진 관찰 결과를 저장한다.
 7. 앱이 다음 촬영 요청 또는 누락 항목을 표시한다.
 
 실패 흐름:
 
-- 업로드 실패 시 재시도 버튼을 보여준다.
+- 사진 저장 또는 분석 실패 시 재시도 버튼을 보여준다.
 - 잘못된 파일 형식이면 업로드를 차단한다.
 - 흔들림/어두움 품질 불합격이면 외부 비전 API를 부르지 않고 다시 촬영을 요청한다.
 - CV 분석 실패 시 수동 항목 상태를 유지한다.
@@ -152,7 +154,7 @@
 
 보안 시나리오:
 
-- 파일명은 UUID로 저장한다.
+- 로컬 사진 참조는 UUID 기반으로 관리한다.
 - 원본 파일명과 개인정보를 로그에 남기지 않는다.
 
 저장 데이터:
@@ -163,10 +165,13 @@
 
 - S-06 사진 기록 안내
 
-관련 API:
+데이터/호출:
 
-- `POST /accidents/{accident_id}/photos`
-- `GET /accidents/{accident_id}/next-action`
+- camera 또는 image_picker
+- app documents directory
+- Hive `accident_photos`
+- optional `POST /analyze/photo`
+- optional `POST /next-action`
 
 완료 기준:
 
@@ -182,8 +187,8 @@
 
 정상 흐름:
 
-1. 앱이 체크리스트 결과 화면을 요청한다.
-2. 백엔드가 상황 후보와 사진 상태를 확인한다.
+1. 앱이 로컬 사고 기록 스냅샷을 읽는다.
+2. Decision Core가 상황 후보와 사진 상태를 확인한다.
 3. 누락 분석 모듈이 요구표에서 채워진 항목을 제외한다.
 4. 계획 모듈이 NextAction 1개와 체크리스트를 선택한다.
 5. 앱이 다음 행동과 체크리스트를 표시한다.
@@ -192,7 +197,7 @@
 
 실패 흐름:
 
-- 체크리스트 매칭 실패 시 기본 체크리스트를 반환한다.
+- 체크리스트 매칭 실패 시 기본 체크리스트를 표시한다.
 - 요약 생성 실패 시 저장된 원본 정보를 표시한다.
 - LLM 요약이 실패하면 문서 템플릿 기반 요약을 표시한다.
 
@@ -206,11 +211,10 @@
 - S-07 체크리스트 결과
 - S-08 사고 요약
 
-관련 API:
+데이터/호출:
 
-- `GET /accidents/{accident_id}/next-action`
-- `GET /accidents/{accident_id}/checklist`
-- `GET /accidents/{accident_id}/summary`
+- Hive `accidents`, `checklist_results`
+- local decision core 또는 `POST /next-action`
 
 완료 기준:
 

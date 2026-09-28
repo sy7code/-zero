@@ -20,9 +20,9 @@ MVP 화면은 8개 이하로 유지한다.
 - 사고 대응 시작 선택
 - 차량 정보 등록 선택
 
-호출 API:
+데이터/호출:
 
-- `GET /vehicles`
+- Hive `vehicles`, `accidents` 조회
 
 성공 상태:
 
@@ -30,7 +30,7 @@ MVP 화면은 8개 이하로 유지한다.
 
 실패 상태:
 
-- 차량 정보 조회 실패 메시지와 재시도 버튼
+- 로컬 저장소 조회 실패 메시지와 재시도 버튼
 
 다음 화면:
 
@@ -58,9 +58,9 @@ MVP 화면은 8개 이하로 유지한다.
 - 보험사
 - 긴급 연락처
 
-호출 API:
+데이터/호출:
 
-- `POST /vehicles`
+- Hive `vehicles.put`
 
 성공 상태:
 
@@ -98,10 +98,12 @@ MVP 화면은 8개 이하로 유지한다.
 - 다친 사람 있음/없음/잘 모르겠음
 - 2차 사고 위험 있음/없음/잘 모르겠음
 
-호출 API:
+데이터/호출:
 
-- `POST /accidents`
-- `POST /accidents/{accident_id}/triage-answers`
+- geolocator
+- Hive `accidents.put`
+- Hive `triage_answers.putAll`
+- optional `POST /next-action`
 
 성공 상태:
 
@@ -110,7 +112,7 @@ MVP 화면은 8개 이하로 유지한다.
 실패 상태:
 
 - 위치 권한 거부 시 수동 입력 제공
-- 서버 저장 실패 시 재시도 제공
+- 로컬 저장 실패 시 재시도 제공
 
 다음 화면:
 
@@ -139,10 +141,10 @@ MVP 화면은 8개 이하로 유지한다.
 - 시설물 파손 여부
 - 현장 위험 여부
 
-호출 API:
+데이터/호출:
 
-- `POST /accidents/{accident_id}/triage-answers`
-- `GET /accidents/{accident_id}/situation`
+- Hive `triage_answers.putAll`
+- local decision core 또는 `POST /next-action`
 
 성공 상태:
 
@@ -150,7 +152,7 @@ MVP 화면은 8개 이하로 유지한다.
 
 실패 상태:
 
-- 답변 저장 실패 시 재시도
+- 로컬 답변 저장 실패 시 재시도
 - 상황 후보 유추 실패 시 기본 사진 안내로 이동
 
 다음 화면:
@@ -175,9 +177,10 @@ MVP 화면은 8개 이하로 유지한다.
 - 후보 확인
 - 답변 수정
 
-호출 API:
+데이터/호출:
 
-- `GET /accidents/{accident_id}/situation`
+- Hive `situation_candidates`
+- local decision core 또는 `POST /next-action`
 
 성공 상태:
 
@@ -214,10 +217,13 @@ MVP 화면은 8개 이하로 유지한다.
 - 항목 건너뛰기, 선택
 - 10초 무응답, 이벤트로 기록
 
-호출 API:
+데이터/호출:
 
-- `POST /accidents/{accident_id}/photos`
-- `GET /accidents/{accident_id}/next-action`
+- camera 또는 image_picker
+- app documents directory
+- Hive `accident_photos.put`
+- optional `POST /analyze/photo`
+- optional `POST /next-action`
 
 성공 상태:
 
@@ -226,7 +232,7 @@ MVP 화면은 8개 이하로 유지한다.
 
 실패 상태:
 
-- 업로드 실패 메시지와 재시도 버튼
+- 사진 저장/분석 실패 메시지와 재시도 버튼
 - 사진 품질 불합격 시 API 분석 없이 다시 촬영 요청, OpenCV 적용 시
 
 다음 화면:
@@ -252,10 +258,10 @@ MVP 화면은 8개 이하로 유지한다.
 
 - 체크 항목 완료 표시
 
-호출 API:
+데이터/호출:
 
-- `GET /accidents/{accident_id}/checklist`
-- `GET /accidents/{accident_id}/next-action`
+- Hive `checklist_results`
+- local decision core 또는 `POST /next-action`
 
 성공 상태:
 
@@ -288,9 +294,9 @@ MVP 화면은 8개 이하로 유지한다.
 
 - 홈으로 돌아가기
 
-호출 API:
+데이터/호출:
 
-- `GET /accidents/{accident_id}/summary`
+- Hive `accidents`, `accident_photos`, `checklist_results`
 
 성공 상태:
 

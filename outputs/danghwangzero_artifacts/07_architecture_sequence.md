@@ -4,126 +4,99 @@
 
 ```text
 Flutter App
-  - 화면 표시
-  - 위치/카메라 권한 처리
-  - 버튼형 상황 파악 UI
-  - 사진 촬영/업로드
-  - 체크리스트/요약 표시
+  - 화면, 상태, 라우팅
+  - 카메라/위치/음성 읽기/공유
+  - Hive에 차량 정보, 사고 기록, 사진 메타데이터 저장
+  - app documents directory에 사고 사진 파일 저장
+  - NextAction을 화면 컴포넌트로 렌더링
 
 FastAPI Backend
-  - API request/response 처리
-  - 입력값 검증
-  - 사고 기록 service
-  - 사진 업로드 service
-  - 중앙 조정자(orchestrator)
-  - AI/CV 모듈을 고정 JSON 계약으로 호출
+  - Pydantic 계약 검증
+  - 사진 품질 검사, PhotoFacts 변환, NextAction 계산
+  - real/mock/replay adapter 선택
+  - 서버 장기 저장 없이 계산 결과 반환
 
-Supabase PostgreSQL
-  - 차량 정보
-  - 사고 기록
-  - 단계형 질문 답변
-  - 상황 후보
-  - 체크리스트 결과
+Decision Core
+  - safety guard
+  - situation candidate rule
+  - gap analysis
+  - checklist selector
+  - next-action planner
 
-Supabase Storage
-  - 사고 사진 저장
+Vision Pipeline, optional
+  - Pillow/OpenCV preprocess
+  - Google Cloud Vision 후보
+  - 보조 모델 후보
+  - raw response -> PhotoFacts
 
-AI/CV Modules
-  - session: 시간/위치 기반 사고 기록 생성
-  - preprocess: 회전, 크기, 밝기, 흔들림 검사
-  - vision: Cloud Vision/Gemini/YOLO/mock/replay 중 하나
-  - textualize: 원본 응답을 PhotoFacts로 변환
-  - state: 이벤트를 사고 기록 상태에 반영
-  - safety: 긴급 후보 규칙
-  - classify: 규칙 기반 상황 후보, 애매할 때만 LLM 후보
-  - gaps: 요구표 기반 누락 항목 분석
-  - plan: NextAction 1개 선택
-  - report: 사고 기록 카드 생성
+Scenario Validation
+  - PyYAML scenario
+  - pytest
+  - replay fixture
+  - 30장 사진 시험
 ```
 
 ## Component Boundary
 
 | Component | 책임 | 입력 | 출력 | Failure Mode | Fallback |
 | --- | --- | --- | --- | --- | --- |
-| Flutter App | 사용자 입력과 결과 표시 | 사용자 입력, 사진, 위치 | API 요청 | 권한 거부, 네트워크 실패 | 수동 입력, 재시도, 로컬 안내 |
-| FastAPI Backend | 비즈니스 로직과 저장 연결 | API 요청 | API 응답 | DB 실패, 파일 실패 | 안전한 실패 응답 |
-| Supabase DB | 구조화 데이터 저장 | 사고/차량/답변 데이터 | 조회 결과 | 연결 실패 | 재시도, 사용자 안내 |
-| Supabase Storage | 사진 저장 | 이미지 파일 | storage path | 업로드 실패 | 재시도 |
-| AI Rule Module | 상황 후보/체크리스트 매칭 | 질문 답변, 사진 상태 | 후보, 체크리스트 | 규칙 매칭 실패 | 기본 체크리스트 |
-| CV Module | 사진 항목/품질 보조 | 이미지 | 분석 결과 | 분석 실패 | 수동 사진 항목 유지 |
-| PhotoFacts Contract | 사진에서 관찰한 사실만 전달 | 비전 원본 응답, mock | PhotoFacts JSON | 항목 unknown | 사용자 질문 또는 수동 항목 유지 |
-| NextAction Contract | 앱이 그릴 다음 행동 1개 선택 | 사고 상태, 누락 목록 | NextAction JSON | 결정 실패 | 기본 사진 요청 또는 기본 체크리스트 |
+| Flutter App | 사용자 입력, 화면, 로컬 저장 | 버튼, 사진, 위치 | AccidentSnapshot, local record | 권한 거부, 기기 API 실패 | 수동 입력, 기본 체크리스트 |
+| Hive Local Storage | 사용자 기기 기록 저장 | 차량/사고/사진 메타데이터 | 로컬 조회 결과 | 저장 실패, 용량 부족 | 사용자에게 저장 실패 표시 |
+| FastAPI | 계산 API와 계약 검증 | AccidentSnapshot, image, replay_ref | PhotoFacts, NextAction | timeout, validation error | mock/replay/manual 결과 |
+| Decision Core | 상황 후보와 다음 행동 선택 | 질문 답변, PhotoFacts, 요구표 | SituationCandidate, NextAction | 규칙 매칭 실패 | 기본 촬영 요청 또는 기본 체크리스트 |
+| Vision Adapter | 사진 관찰 후보 생성 | 이미지 또는 fixture | raw response | API 실패, 비용/쿼터 초과 | replay 또는 manual PhotoFacts |
+| Scenario Runner | 데모 검증 자동화 | YAML scenario | pass/fail report | fixture 누락 | 실패 케이스 기록 |
 
 ## Module Rules
 
-- 모듈끼리 직접 서로 호출하지 않고 FastAPI orchestrator가 순서를 조정한다.
-- 외부 서비스를 부르는 곳은 주소 변환, vision, 선택적 LLM 분류, 선택적 LLM 요약으로 제한한다.
-- `preprocess`, `textualize`, `safety`, `classify` 규칙, `gaps`, `plan`은 같은 입력이면 같은 출력을 내야 한다.
-- 외부 서비스 모듈은 `real`, `mock`, `replay` 구현을 같은 interface로 둔다.
-- 사고 한 건의 주요 이벤트는 JSONL 형태로 재생 가능하게 남긴다. 단, 차량번호, 전화번호, 실제 위치 원문은 마스킹한다.
+- 기록의 source of truth는 Flutter 앱 로컬 저장소다.
+- FastAPI는 실제 사고 기록을 장기 저장하지 않는다.
+- 외부 API 호출 결과는 PhotoFacts로 정규화한 뒤에만 Decision Core로 넘긴다.
+- AI/CV는 긴급도를 낮추거나 공식 판단을 대체할 수 없다.
+- `PhotoFacts`의 `unknown`은 `no`가 아니다.
+- 전화는 자동 실행하지 않고 사용자가 직접 버튼을 누를 때만 연결한다.
+- 로그에는 request_id, module, elapsed_ms, rule_id만 남기고 번호판, 전화번호, 상세 주소 원문은 남기지 않는다.
 
-## Core Sequence: 사고 대응 시작부터 체크리스트까지
+## Core Sequence: 시작부터 사고 기록 카드까지
 
 ```text
 User
   -> Flutter App: 사고 대응 시작
-  -> Flutter App: 위치/시간 수집
-  -> FastAPI: POST /accidents
-  -> Supabase DB: accidents 저장
-  -> FastAPI: accident_id 반환
-  -> Flutter App: 단계형 질문 표시
-  -> User: 버튼/칩 답변
-  -> FastAPI: POST /accidents/{id}/triage-answers
-  -> Supabase DB: triage_answers 저장
-  -> AI Rule Module: situation 후보 계산
-  -> Supabase DB: situation_candidates 저장
-  -> Flutter App: 상황 후보 표시
-  -> User: 사진 업로드
-  -> FastAPI: POST /accidents/{id}/photos
-  -> Preprocess: 품질 검사
-  -> Supabase Storage: 이미지 저장
-  -> Supabase DB: accident_photos 저장
-  -> Vision/Textualize, optional: PhotoFacts 생성
-  -> Gaps Module: 요구표 기반 누락 항목 계산
-  -> Plan Module: NextAction 선택
-  -> FastAPI: GET /accidents/{id}/checklist
-  -> Flutter App: 체크리스트 표시
+  -> Device APIs: 위치/시각 수집
+  -> Hive: accident 생성
+  -> Flutter App: 안전 확인 질문
+  -> Decision Core, local or API: 긴급 후보 계산
+  -> Flutter App: 전경 사진 요청
+  -> User: 사진 촬영
+  -> FastAPI, optional: POST /analyze/photo
+  -> Vision or Replay: PhotoFacts 생성
+  -> Decision Core: gaps 계산
+  -> Flutter App: 쉬운 질문 또는 다음 사진 요청
+  -> Hive: answers, photo_facts, action_logs 저장
+  -> Flutter App: 사고 기록 카드 표시
 ```
 
-## Core Sequence: PhotoFacts 기반 사진 처리
+## Core Sequence: AI/CV 없이 검증
+
+```text
+Scenario YAML
+  -> Scenario Runner: 고정 시각/위치 주입
+  -> Decision Core: NextAction 생성
+  -> Mock PhotoFacts: 사진 관찰 주입
+  -> Gap Analysis: 누락 항목 계산
+  -> NextAction: 다음 요청 1개 반환
+  -> pytest: expected action과 비교
+```
+
+## Failure Sequence: 비전 API 실패
 
 ```text
 Flutter App
-  -> FastAPI: POST /accidents/{id}/photos
-  -> Preprocess: rotate/resize/blur/brightness
-  -> FastAPI: 품질 불합격이면 다시 촬영 요청
-  -> Vision Adapter: real/mock/replay 중 하나 실행
-  -> Textualize Module: raw response -> PhotoFacts
-  -> State Module: PhotoFacts를 사고 상태에 반영
-  -> Gaps Module: 요구표에서 남은 항목 계산
-  -> Plan Module: NextAction 생성
-  -> Flutter App: 현재 요청 1개 표시
-```
-
-## Failure Sequence: AI/CV 실패
-
-```text
-Flutter App
-  -> FastAPI: 체크리스트 요청
-  -> AI/CV Module: 분석 실패
-  -> FastAPI: PhotoFacts 없이 수동 사진 상태와 질문 답변으로 gaps 계산
-  -> FastAPI: 기본 NextAction 또는 기본 체크리스트 fallback
-  -> Flutter App: 기본 안내와 "추가 확인 필요" 표시
-```
-
-## Failure Sequence: 비전 API 불안정
-
-```text
-FastAPI
+  -> FastAPI: 사진 분석 요청
   -> Vision Adapter: timeout 또는 quota error
-  -> Replay Adapter: 녹화 응답이 있으면 재생
-  -> Manual Fallback: 없으면 사용자가 직접 항목을 확인하는 choice action 반환
-  -> Flutter App: 수동 확인 UI 표시
+  -> Replay Adapter: fixture 있으면 재생
+  -> Manual Fallback: 없으면 choice action 반환
+  -> Flutter App: 사용자가 직접 확인하는 버튼 UI 표시
 ```
 
 ## Failure Sequence: 위치 권한 거부
@@ -134,13 +107,13 @@ Flutter App
   -> User: 거부
   -> Flutter App: 수동 위치 입력 표시
   -> User: 위치 메모 입력
-  -> FastAPI: POST /accidents location_source=manual
-  -> Supabase DB: 사고 기록 저장
+  -> Hive: location_source=manual로 사고 기록 저장
 ```
 
-## Security Notes
+## Security and Privacy Notes
 
-- Flutter 앱에 server secret을 넣지 않는다.
-- 모든 사진 파일명은 UUID 기반으로 저장한다.
-- 로그에 차량번호, 전화번호, 위치 원문, storage path를 과도하게 남기지 않는다.
-- 데모 데이터에는 실제 개인정보를 사용하지 않는다.
+- 서버 secret은 Flutter 앱 bundle, asset, 설정 파일에 넣지 않는다.
+- 실제 번호판, 전화번호, 상세 주소는 서버 로그와 발표 자료에서 마스킹한다.
+- 외부 AI 테스트에는 실제 개인정보가 포함된 사진을 보내지 않는다.
+- 데모 데이터는 모두 가짜 값으로 만든다.
+- 앱 로컬 저장 데이터와 사진 파일 삭제 방법을 데모 전후에 확인한다.

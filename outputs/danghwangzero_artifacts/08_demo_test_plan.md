@@ -127,10 +127,11 @@
 | ID | 항목 | 기준 |
 | --- | --- | --- |
 | S-01 | `.env` commit 여부 | repository에 없어야 함 |
-| S-02 | server secret | Flutter 앱에 없어야 함 |
+| S-02 | server secret | Flutter 앱 bundle, asset, 설정 파일에 없어야 함 |
 | S-03 | demo data | 실제 개인정보 0개 |
 | S-04 | 로그 | 차량번호/전화번호/위치 원문 없음 |
-| S-05 | 사진 파일명 | UUID 기반 |
+| S-05 | 사진 참조 | UUID 기반, 원본 파일명 저장 금지 |
+| S-06 | 로컬 기록 삭제 | 데모 후 Hive 기록과 사진 파일 삭제 가능 |
 
 ## Demo Gate
 

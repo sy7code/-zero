@@ -9,8 +9,8 @@
 이번 단계에서 보류하는 항목:
 
 - 공식 출처 수집: 체크리스트 문구를 최종 확정하기 전 조사 단계에서 수행한다.
-- threat model: 실제 API, DB, 사진 저장 방식이 정해진 뒤 보안 점검 단계에서 수행한다.
-- 기술 공식 문서 확인: FastAPI, Supabase, Flutter, OpenCV, YOLO를 실제 사용하기로 확정한 뒤 ADR 또는 조사 기록에 출처를 붙인다.
+- threat model: 실제 API, Flutter 로컬 저장 schema, 사진 저장 방식이 정해진 뒤 보안 점검 단계에서 수행한다.
+- 기술 공식 문서 확인: Flutter, Hive, camera, geolocator, FastAPI, OpenCV, Google Cloud Vision 후보를 실제 사용하기로 확정한 뒤 ADR 또는 조사 기록에 출처를 붙인다.
 
 즉, 지금은 팀원별 owner map을 먼저 확정하고, 출처/위험 분석은 구현 전 Gate에서 빠지지 않도록 추적만 한다.
 
@@ -19,7 +19,7 @@
 자료조사와 의사결정은 다음 출처 우선순위를 따른다.
 
 1. 경찰청, 소방청, 도로교통공단, 공공데이터포털, 보험사 공식 사고 안내
-2. Flutter, FastAPI, Supabase, OpenCV, Ultralytics 공식 문서
+2. Flutter, Hive, camera, geolocator, FastAPI, OpenCV, Google Cloud Vision 공식 문서
 3. 신뢰 가능한 기술 블로그 또는 기업 엔지니어링 블로그
 4. 일반 블로그, 커뮤니티 글, 영상 자료
 
@@ -116,36 +116,36 @@
 
 - 팀 백엔드 담당자가 Spring Boot 경험이 압도적으로 많고 AI/CV를 별도 Python 모듈로 분리하기로 결정한 경우
 
-## D-04. DB/Storage는 Supabase를 사용한다
+## D-04. 사고 기록은 Flutter 로컬 저장소에 저장한다
 
 선택지:
 
-- Supabase
-- Firebase
+- Hive + 앱 문서 디렉터리 로컬 저장
+- Supabase 또는 Firebase 원격 저장
 - 직접 PostgreSQL 서버
 
 근거:
 
-- 사고 기록은 관계형 데이터로 정리하기 좋다.
-- Storage로 사진 저장을 함께 처리할 수 있다.
-- 무료 범위 MVP에 적합하다.
+- 3차 발표안의 핵심 문구가 `기록은 내 폰에만`이고, 사용자도 Flutter 앱 프로토타입을 만들기로 확정했다.
+- 사고 사진, 위치, 차량번호는 민감도가 높아 MVP에서는 원격 저장 부담을 줄이는 편이 안전하다.
+- Hive와 앱 문서 디렉터리 조합은 Flutter 프로토타입에서 네트워크 없이 히스토리와 사진 기록을 보여주기 좋다.
 
 출처:
 
-- 필요: Supabase 공식 문서/가격 정책
-- 현재 상태: 기술 선택 가정
+- 필요: Hive, path_provider, 앱 저장소 권한/백업 정책 관련 공식 문서
+- 현재 상태: 사용자 확정 방향 기반 기술 선택
 
 가정:
 
-- 무료 플랜 한도 안에서 데모 데이터와 사진 저장이 가능하다.
+- 사용자 기기 안 로컬 저장만으로 MVP 데모 가치가 충분하다.
 
 신뢰도:
 
-- Medium, 무료 한도 확인 필요
+- High, 3차 발표 방향과 일치
 
 재검토 조건:
 
-- Supabase 무료 한도 또는 학교 네트워크 환경이 시연에 맞지 않는 경우
+- 여러 기기 동기화, 팀 공동 조회, 원격 백업이 MVP 필수로 바뀌는 경우
 
 ## D-05. AI/CV는 기본 흐름의 필수 의존성이 아니다
 
@@ -237,27 +237,29 @@
 - 평가자가 실제 비전 모델 사용을 필수로 요구하는 경우
 - 30장 시험에서 특정 기술의 채움률이 충분히 높은 경우
 
-## D-08. React/웹 전제와 Cloudflare 터널 전제는 제외한다
+## D-08. 앱 형태는 Flutter 프로토타입으로 진행한다
 
 선택지:
 
-- 참고 자료의 웹/React 디버그 전제를 그대로 사용
-- 모바일 앱 구조에 맞게 Flutter 앱, FastAPI, 개발용 로그/디버그 API 중심으로 수정
+- Flutter 앱
+- React PWA
+- 네이티브 Android 앱
 
 근거:
 
-- 사용자가 명시한 프로젝트 형태는 앱이다.
-- Flutter 앱에서는 React 화면 전제를 그대로 가져오면 구현 방향이 어긋난다.
-- 터널/HTTPS/브라우저 제약은 웹 시연일 때 중요하지만, Android 앱/APK 또는 로컬 API 시연 방식이 정해진 뒤 다시 판단하는 편이 낫다.
+- 사용자가 앱 프로토타입과 Flutter 프론트엔드를 명시적으로 확정했다.
+- 카메라, 위치, 음성 읽기, 공유 기능은 Flutter 패키지로 MVP 데모가 가능하다.
+- 평가자에게 실제 모바일 앱 흐름과 권한 요청을 보여주기 쉽다.
 
 출처:
 
-- 사용자 요구: 앱 프로젝트
+- 최신 자료: `3조3차.pdf`
+- 사용자 확정: Flutter 앱 프로토타입
 - 참고 자료: `당황Zero_설계제안.html`
 
 가정:
 
-- 시연은 Android 폰 또는 에뮬레이터 기반으로 진행한다.
+- 시연은 Android 기기 또는 에뮬레이터에서 Flutter 앱으로 진행한다.
 
 신뢰도:
 
@@ -265,7 +267,7 @@
 
 재검토 조건:
 
-- 최종 시연을 웹앱으로 전환하는 경우
+- 팀원이 Flutter 개발 환경을 준비할 수 없거나, 평가자가 웹 배포를 필수로 요구하는 경우
 
 ## 3. Missing Information
 
@@ -274,10 +276,10 @@
 아래 정보는 답에 따라 MVP 범위나 기술 선택이 바뀔 수 있다.
 
 1. 팀원별 실제 기술 숙련도
-   - Flutter 경험
+   - Flutter/Dart 경험
    - Python/FastAPI 경험
-   - Supabase 경험
-   - OpenCV/YOLO 경험
+   - Hive 또는 sqflite 경험
+   - OpenCV/Google Vision 경험
 
 2. 평가 방식
    - 라이브 데모인지 영상 제출인지
@@ -290,8 +292,8 @@
    - 최종 발표일
 
 4. 실행 환경
-   - Android 기기 사용 가능 여부
-   - 학교 네트워크에서 외부 API/Supabase 접근 가능 여부
+   - Android 기기 또는 에뮬레이터 테스트 가능 여부
+   - 학교 네트워크에서 외부 API 접근 가능 여부
    - 백엔드 서버를 어디에서 실행할지
 
 5. 공식 자료 요구 수준
@@ -309,7 +311,7 @@
 2. 사고 기록을 여러 건 저장해야 하는지
 3. 사진을 실제로 업로드할지, 데모에서는 더미 이미지로 대체할지
 4. LLM API 비용 사용 가능 여부
-5. YOLO 데모가 필수인지 선택인지
+5. Vision API 데모가 필수인지 선택인지
 
 ## Low Impact
 
@@ -336,11 +338,11 @@
 - 소방청 119 신고 또는 인명 피해 대응 안내
 - 도로교통공단 교통사고 예방/대응 자료
 - 보험사 사고 접수/현장 사진 안내
-- Flutter camera/geolocator 공식 문서
+- Flutter 공식 문서
+- Hive 공식 문서
+- camera/geolocator/flutter_tts/share_plus/path_provider 공식 문서
 - FastAPI 공식 문서
-- Supabase 공식 문서
 - OpenCV 공식 문서
-- Ultralytics YOLO 공식 문서, YOLO를 쓸 경우
 - Google Cloud Vision 공식 문서, Cloud Vision을 쓸 경우
 - Gemini 공식 문서와 약관, Gemini를 쓸 경우
 - 위치정보법/도로교통법 관련 공식 법령, 앱에 위치/신고 안내 문구를 넣을 경우
