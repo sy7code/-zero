@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="520" viewBox="0 0 1280 520" role="img" aria-labelledby="title desc">
+  <title id="title">당황Zero 7단계 사용자 흐름</title>
+  <desc id="desc">사고 대응 시작부터 사고 기록 카드까지 이어지는 7단계 흐름과 긴급 분기를 보여준다.</desc>
+  <defs>
+    <style>
+      .bg { fill: #fbfaf7; }
+      .title { font: 800 34px "Pretendard", "Noto Sans KR", sans-serif; fill: #202124; }
+      .subtitle { font: 500 17px "Pretendard", "Noto Sans KR", sans-serif; fill: #5f6368; }
+      .step { fill: #ffffff; stroke: #ddd7ce; stroke-width: 2; }
+      .step.hot { stroke: #df4b32; }
+      .num { font: 800 15px "Pretendard", "Noto Sans KR", sans-serif; fill: #df4b32; }
+      .label { font: 800 18px "Pretendard", "Noto Sans KR", sans-serif; fill: #202124; }
+      .note { font: 500 13px "Pretendard", "Noto Sans KR", sans-serif; fill: #666b72; }
+      .arrow { stroke: #7b7f86; stroke-width: 2.4; fill: none; marker-end: url(#arrow); }
+      .danger { fill: #fff0ed; stroke: #b42318; stroke-width: 2; }
+      .dangerText { font: 800 17px "Pretendard", "Noto Sans KR", sans-serif; fill: #b42318; }
+      .pill { fill: #f6e9e4; }
+      .pillText { font: 700 13px "Pretendard", "Noto Sans KR", sans-serif; fill: #9c3a24; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#7b7f86" />
+    </marker>
+  </defs>
+  <rect class="bg" width="1280" height="520" />
+  <text class="title" x="60" y="62">7단계로 끝나는 사고 대응</text>
+  <text class="subtitle" x="60" y="94">한 번에 하나씩 묻고, 사진 누락을 줄이고, 기록은 사용자 기기에 남긴다.</text>
+
+  <g transform="translate(60 145)">
+    <rect class="step hot" x="0" y="0" width="140" height="132" rx="10" />
+    <text class="num" x="18" y="30">1</text>
+    <text class="label" x="18" y="62">시작</text>
+    <text class="note" x="18" y="91">시각·위치</text>
+    <text class="note" x="18" y="112">자동 기록</text>
+  </g>
+  <path class="arrow" d="M205 211 H260" />
+  <g transform="translate(270 145)">
+    <rect class="step" x="0" y="0" width="140" height="132" rx="10" />
+    <text class="num" x="18" y="30">2</text>
+    <text class="label" x="18" y="62">안전 확인</text>
+    <text class="note" x="18" y="91">있음·없음</text>
+    <text class="note" x="18" y="112">모름</text>
+  </g>
+  <path class="arrow" d="M415 211 H470" />
+  <g transform="translate(480 145)">
+    <rect class="step" x="0" y="0" width="140" height="132" rx="10" />
+    <text class="num" x="18" y="30">3</text>
+    <text class="label" x="18" y="62">전경 사진</text>
+    <text class="note" x="18" y="91">상황 전체</text>
+    <text class="note" x="18" y="112">관찰 기록</text>
+  </g>
+  <path class="arrow" d="M625 211 H680" />
+  <g transform="translate(690 145)">
+    <rect class="step" x="0" y="0" width="140" height="132" rx="10" />
+    <text class="num" x="18" y="30">4</text>
+    <text class="label" x="18" y="62">쉬운 질문</text>
+    <text class="note" x="18" y="91">버튼 2-4개</text>
+    <text class="note" x="18" y="112">모름 포함</text>
+  </g>
+  <path class="arrow" d="M835 211 H890" />
+  <g transform="translate(900 145)">
+    <rect class="step" x="0" y="0" width="140" height="132" rx="10" />
+    <text class="num" x="18" y="30">5</text>
+    <text class="label" x="18" y="62">상황 후보</text>
+    <text class="note" x="18" y="91">AI는 후보만</text>
+    <text class="note" x="18" y="112">사용자 확인</text>
+  </g>
+  <path class="arrow" d="M1045 211 H1100" />
+  <g transform="translate(1110 145)">
+    <rect class="step hot" x="0" y="0" width="140" height="132" rx="10" />
+    <text class="num" x="18" y="30">6</text>
+    <text class="label" x="18" y="62">상황별 사진</text>
+    <text class="note" x="18" y="91">누락 항목</text>
+    <text class="note" x="18" y="112">다시 요청</text>
+  </g>
+
+  <path class="arrow" d="M1180 282 V342 H805" />
+  <g transform="translate(640 330)">
+    <rect class="step hot" x="0" y="0" width="330" height="112" rx="10" />
+    <text class="num" x="22" y="30">7</text>
+    <text class="label" x="22" y="62">사고 기록 카드</text>
+    <text class="note" x="22" y="91">상황 후보 · 사진 상태 · 진행 로그 · 공유</text>
+  </g>
+
+  <path class="arrow" d="M340 282 V340 H260" />
+  <g transform="translate(60 320)">
+    <rect class="danger" x="0" y="0" width="390" height="122" rx="10" />
+    <text class="dangerText" x="22" y="38">긴급 분기</text>
+    <text class="note" x="22" y="69">부상 있음·모름, 연기·화재, 2차 사고 위험</text>
+    <rect class="pill" x="22" y="84" width="250" height="24" rx="12" />
+    <text class="pillText" x="36" y="101">배포 전 전화는 데모 번호로 연결</text>
+  </g>
+</svg>

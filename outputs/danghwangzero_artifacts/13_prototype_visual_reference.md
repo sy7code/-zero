@@ -1,5 +1,7 @@
 # 당황Zero Prototype Visual Reference
 
+![프로토타입 화면 구성](images/02_prototype_screens.svg)
+
 이 문서는 `3조3차.pdf`의 데모 화면 방향을 Flutter 프로토타입에 반영하기 위한 기준이다.
 
 ## 기준

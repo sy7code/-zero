@@ -1,5 +1,7 @@
 # 당황Zero Demo and Test Plan
 
+![배포 전 긴급 전화 안전장치](images/05_emergency_call_guard.svg)
+
 ## Demo Goal
 
 평가자가 3분 안에 당황Zero가 일반 AI 챗봇과 다르게 사고 직후 대응 과정을 구조화해준다는 점을 이해하게 한다.

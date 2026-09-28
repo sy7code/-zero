@@ -1,5 +1,7 @@
 # 당황Zero Screen Specification
 
+![프로토타입 화면 구성](images/02_prototype_screens.svg)
+
 MVP 화면은 8개 이하로 유지한다.
 
 ## S-01. 홈

@@ -1,5 +1,7 @@
 # 당황Zero Architecture and Sequence
 
+![시스템 구조](images/03_architecture.svg)
+
 ## System Architecture
 
 ```text

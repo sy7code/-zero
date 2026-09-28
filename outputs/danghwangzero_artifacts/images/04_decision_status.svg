@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="560" viewBox="0 0 1280 560" role="img" aria-labelledby="title desc">
+  <title id="title">당황Zero 결정 상태표</title>
+  <desc id="desc">확정, 조정 가능, 검증 후 결정, 현재 결정 불가, 범위 밖 항목을 나누어 보여준다.</desc>
+  <defs>
+    <style>
+      .bg { fill: #fbfaf7; }
+      .title { font: 800 32px "Pretendard", "Noto Sans KR", sans-serif; fill: #202124; }
+      .sub { font: 500 15px "Pretendard", "Noto Sans KR", sans-serif; fill: #5d646d; }
+      .card { fill: #fff; stroke: #dcd6cf; stroke-width: 2; }
+      .head { font: 800 20px "Pretendard", "Noto Sans KR", sans-serif; fill: #202124; }
+      .item { font: 600 14px "Pretendard", "Noto Sans KR", sans-serif; fill: #4d535a; }
+      .fixed { fill: #fff0ec; stroke: #df4b32; }
+      .adjust { fill: #f3f8ff; stroke: #4277b8; }
+      .test { fill: #f6f4ff; stroke: #7661b8; }
+      .unknown { fill: #fff9e9; stroke: #bf8a1a; }
+      .out { fill: #f4f4f4; stroke: #777; }
+    </style>
+  </defs>
+  <rect class="bg" width="1280" height="560" />
+  <text class="title" x="60" y="58">확정 계획이 아니라, 조정 가능한 작업 틀</text>
+  <text class="sub" x="60" y="88">팀이 바꿀 수 있는 것과 지금 결정하면 안 되는 것을 분리한다.</text>
+
+  <g transform="translate(60 135)">
+    <rect class="card fixed" width="220" height="300" rx="14" />
+    <text class="head" x="24" y="42">확정</text>
+    <text class="item" x="24" y="86">Flutter 프로토타입</text>
+    <text class="item" x="24" y="120">초기 대응 보조</text>
+    <text class="item" x="24" y="154">공식 판단 금지</text>
+    <text class="item" x="24" y="188">배포 전 데모 번호</text>
+  </g>
+
+  <g transform="translate(305 135)">
+    <rect class="card adjust" width="220" height="300" rx="14" />
+    <text class="head" x="24" y="42">조정 가능</text>
+    <text class="item" x="24" y="86">Hive 또는 sqflite</text>
+    <text class="item" x="24" y="120">상태 관리 방식</text>
+    <text class="item" x="24" y="154">FastAPI 범위</text>
+    <text class="item" x="24" y="188">공유 방식</text>
+  </g>
+
+  <g transform="translate(550 135)">
+    <rect class="card test" width="220" height="300" rx="14" />
+    <text class="head" x="24" y="42">검증 후 결정</text>
+    <text class="item" x="24" y="86">Cloud Vision</text>
+    <text class="item" x="24" y="120">보조 모델</text>
+    <text class="item" x="24" y="154">OpenCV 기준</text>
+    <text class="item" x="24" y="188">주소 변환 API</text>
+  </g>
+
+  <g transform="translate(795 135)">
+    <rect class="card unknown" width="220" height="300" rx="14" />
+    <text class="head" x="24" y="42">현재 결정 불가</text>
+    <text class="item" x="24" y="86">최종 발표 방식</text>
+    <text class="item" x="24" y="120">팀원 역할</text>
+    <text class="item" x="24" y="154">외부 API 비용</text>
+    <text class="item" x="24" y="188">실제 사진 사용</text>
+  </g>
+
+  <g transform="translate(1040 135)">
+    <rect class="card out" width="180" height="300" rx="14" />
+    <text class="head" x="24" y="42">범위 밖</text>
+    <text class="item" x="24" y="86">과실비율</text>
+    <text class="item" x="24" y="120">법적 책임</text>
+    <text class="item" x="24" y="154">자동 신고</text>
+    <text class="item" x="24" y="188">보험사 연동</text>
+  </g>
+
+  <text class="sub" x="60" y="500">원칙: 확정이 아닌 항목은 발표나 README에서 확정 표현으로 쓰지 않는다.</text>
+</svg>

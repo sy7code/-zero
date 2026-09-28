@@ -1,5 +1,7 @@
 # 당황Zero Decision Status Register
 
+![결정 상태표](images/04_decision_status.svg)
+
 이 문서는 현재 산출물이 `최종 확정 계획`이 아니라 구현과 발표 준비를 위한 `작업 틀`임을 명확히 하기 위한 상태표다.
 
 ## 상태 정의

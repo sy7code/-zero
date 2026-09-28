@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="620" viewBox="0 0 1280 620" role="img" aria-labelledby="title desc">
+  <title id="title">당황Zero 시스템 구조</title>
+  <desc id="desc">Flutter 앱, 로컬 저장소, 선택적 FastAPI, Vision 후보, mock replay 검증 흐름을 보여준다.</desc>
+  <defs>
+    <style>
+      .bg { fill: #fbfaf7; }
+      .box { fill: #fff; stroke: #d9d3cc; stroke-width: 2; }
+      .primary { fill: #fff6f2; stroke: #df4b32; stroke-width: 2.5; }
+      .optional { fill: #f7f8fa; stroke: #8a9099; stroke-width: 2; stroke-dasharray: 7 5; }
+      .title { font: 800 32px "Pretendard", "Noto Sans KR", sans-serif; fill: #202124; }
+      .h { font: 800 22px "Pretendard", "Noto Sans KR", sans-serif; fill: #202124; }
+      .t { font: 500 15px "Pretendard", "Noto Sans KR", sans-serif; fill: #4f555d; }
+      .tag { font: 800 13px "Pretendard", "Noto Sans KR", sans-serif; fill: #a13b24; }
+      .arrow { stroke: #6f747c; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#6f747c" />
+    </marker>
+  </defs>
+  <rect class="bg" width="1280" height="620" />
+  <text class="title" x="60" y="60">시스템 구조: 앱 중심, AI/CV는 선택</text>
+  <text class="t" x="60" y="92">핵심 기록은 사용자 기기에 남기고, 서버와 외부 API는 프로토타입 안정성을 해치지 않는 범위에서만 붙인다.</text>
+
+  <rect class="primary" x="70" y="150" width="270" height="270" rx="14" />
+  <text class="h" x="98" y="190">Flutter App</text>
+  <text class="t" x="98" y="228">화면 · 상태 · 권한</text>
+  <text class="t" x="98" y="258">카메라 · 위치 · TTS</text>
+  <text class="t" x="98" y="288">NextAction 렌더링</text>
+  <text class="tag" x="98" y="340">확정: Flutter 프로토타입</text>
+
+  <rect class="box" x="420" y="120" width="260" height="150" rx="14" />
+  <text class="h" x="448" y="160">Local Storage</text>
+  <text class="t" x="448" y="196">Hive boxes</text>
+  <text class="t" x="448" y="224">사진은 앱 문서 디렉터리</text>
+
+  <rect class="box" x="420" y="330" width="260" height="150" rx="14" />
+  <text class="h" x="448" y="370">Decision Core</text>
+  <text class="t" x="448" y="406">안전 가드</text>
+  <text class="t" x="448" y="434">누락 분석 · 다음 행동</text>
+
+  <rect class="optional" x="760" y="120" width="250" height="150" rx="14" />
+  <text class="h" x="788" y="160">FastAPI 후보</text>
+  <text class="t" x="788" y="196">PhotoFacts 변환</text>
+  <text class="t" x="788" y="224">NextAction 계산 보조</text>
+
+  <rect class="optional" x="760" y="330" width="250" height="150" rx="14" />
+  <text class="h" x="788" y="370">Vision 후보</text>
+  <text class="t" x="788" y="406">Cloud Vision · OpenCV</text>
+  <text class="t" x="788" y="434">30장 시험 후 결정</text>
+
+  <rect class="box" x="1070" y="225" width="150" height="150" rx="14" />
+  <text class="h" x="1092" y="265">Mock</text>
+  <text class="h" x="1092" y="294">Replay</text>
+  <text class="t" x="1092" y="330">네트워크 없이</text>
+  <text class="t" x="1092" y="354">같은 결과</text>
+
+  <path class="arrow" d="M340 210 H410" />
+  <path class="arrow" d="M340 350 H410" />
+  <path class="arrow" d="M680 195 H750" />
+  <path class="arrow" d="M680 405 H750" />
+  <path class="arrow" d="M1010 195 C1060 195 1060 250 1070 270" />
+  <path class="arrow" d="M1010 405 C1060 405 1060 350 1070 330" />
+
+  <text class="tag" x="760" y="525">조정 가능 / 검증 후 결정: FastAPI, Vision, 보조 모델</text>
+  <text class="tag" x="70" y="525">범위 밖: 과실비율, 법적 책임, 신고 필요 여부 확정</text>
+</svg>

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="480" viewBox="0 0 1280 480" role="img" aria-labelledby="title desc">
+  <title id="title">배포 전 긴급 전화 안전장치</title>
+  <desc id="desc">정식 배포 전에는 긴급 전화 버튼이 실제 112 또는 119가 아니라 데모 번호로 연결됨을 보여준다.</desc>
+  <defs>
+    <style>
+      .bg { fill: #fbfaf7; }
+      .title { font: 800 32px "Pretendard", "Noto Sans KR", sans-serif; fill: #202124; }
+      .sub { font: 500 16px "Pretendard", "Noto Sans KR", sans-serif; fill: #5d646d; }
+      .panel { fill: #fff; stroke: #ddd7ce; stroke-width: 2; }
+      .danger { fill: #b42318; }
+      .safe { fill: #e9f8ef; stroke: #2f855a; stroke-width: 2; }
+      .blocked { fill: #fff0ec; stroke: #df4b32; stroke-width: 2; }
+      .h { font: 800 22px "Pretendard", "Noto Sans KR", sans-serif; fill: #202124; }
+      .t { font: 600 16px "Pretendard", "Noto Sans KR", sans-serif; fill: #4f555d; }
+      .white { fill: #fff; font: 800 18px "Pretendard", "Noto Sans KR", sans-serif; }
+      .arrow { stroke: #6f747c; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#6f747c" />
+    </marker>
+  </defs>
+  <rect class="bg" width="1280" height="480" />
+  <text class="title" x="60" y="58">긴급 전화 버튼 안전장치</text>
+  <text class="sub" x="60" y="88">실수로 실제 긴급번호에 연결되지 않도록, 배포 전에는 데모 번호만 사용한다.</text>
+
+  <rect class="panel" x="80" y="150" width="260" height="180" rx="14" />
+  <text class="h" x="112" y="195">긴급 후보</text>
+  <text class="t" x="112" y="235">부상 있음 · 모름</text>
+  <text class="t" x="112" y="268">연기 · 화재</text>
+  <text class="t" x="112" y="301">2차 사고 위험</text>
+
+  <path class="arrow" d="M360 240 H470" />
+
+  <rect class="danger" x="500" y="130" width="280" height="220" rx="14" />
+  <text class="white" x="540" y="185">긴급 화면</text>
+  <text class="white" x="540" y="230">전화는 자동 실행 안 함</text>
+  <text class="white" x="540" y="275">사용자가 직접 누름</text>
+
+  <path class="arrow" d="M800 240 H900" />
+
+  <rect class="safe" x="930" y="128" width="280" height="92" rx="14" />
+  <text class="h" x="960" y="166">배포 전</text>
+  <text class="t" x="960" y="196">010-0000-0000</text>
+
+  <rect class="blocked" x="930" y="258" width="280" height="92" rx="14" />
+  <text class="h" x="960" y="296">정식 배포 전 금지</text>
+  <text class="t" x="960" y="326">실제 112 / 119 연결</text>
+</svg>

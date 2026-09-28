@@ -1,5 +1,7 @@
 # 당황Zero Feature Scenarios
 
+![7단계 사용자 흐름](images/01_user_flow.svg)
+
 ## F-01. 사전 정보 등록
 
 사용자 목표: 사고 전 차량과 연락처 정보를 등록해 사고 발생 시 자동으로 불러온다.

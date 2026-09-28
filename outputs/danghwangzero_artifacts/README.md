@@ -2,6 +2,14 @@
 
 이 폴더는 구현 전에 팀이 합의해야 하는 산출물을 나눠 정리한 것이다.
 
+## 빠른 시각 요약
+
+![7단계 사용자 흐름](images/01_user_flow.svg)
+
+![프로토타입 화면 구성](images/02_prototype_screens.svg)
+
+![결정 상태표](images/04_decision_status.svg)
+
 ## 기준 자료
 
 최신 기준은 `3조3차.pdf`이다. `3조 1차.pdf`, `3조2차.pdf`, `당황Zero_설계제안.html`은 배경 자료와 보강 근거로만 사용한다.
@@ -32,6 +40,14 @@
 - `12_implementation_roadmap.md`: M0-M4 구현 로드맵과 품질 게이트
 - `13_prototype_visual_reference.md`: 3차 데모 화면 기준과 Flutter 반영 상태
 - `14_decision_status_register.md`: 확정/조정 가능/미결정/결정 불가 항목 정리
+
+## 이미지 자료
+
+- `images/01_user_flow.svg`: 7단계 사용자 흐름과 긴급 분기
+- `images/02_prototype_screens.svg`: 3차 화면 방향 기반 프로토타입 화면
+- `images/03_architecture.svg`: Flutter 중심 시스템 구조
+- `images/04_decision_status.svg`: 확정/조정 가능/검증 후 결정/결정 불가/범위 밖 상태
+- `images/05_emergency_call_guard.svg`: 배포 전 긴급 전화 데모 번호 안전장치
 
 ## 구현 시작 전 Gate
 
