@@ -29,6 +29,11 @@ Android 실행 전 `android/app/src/main/AndroidManifest.xml`에 카메라와 �
 
 서버와 비전 API는 아직 연결하지 않고 mock PhotoFacts와 규칙 기반 NextAction으로 흐름을 보여준다.
 
+## Emergency Call Guard
+
+정식 배포 전 긴급 화면의 전화 버튼은 실제 112/119가 아니라 데모 번호 `010-0000-0000`으로 다이얼러를 연다.
+실제 긴급번호 연결은 공식 안내 문구, 법적 검토, 배포 정책이 확정된 뒤에만 바꾼다.
+
 ## Visual Direction
 
 화면 구조는 3차 자료의 데모 화면을 따른다.
@@ -36,5 +41,5 @@ Android 실행 전 `android/app/src/main/AndroidManifest.xml`에 카메라와 �
 - 홈: 버튼 하나로 시작
 - 안전 확인: 질문 하나와 버튼 셋
 - 촬영 안내: 가이드 틀과 이유 한 줄
-- 긴급 화면: 빨강 전용, 전화는 직접 누름
+- 긴급 화면: 빨강 전용, 배포 전에는 데모 번호로만 연결
 - 사고 기록 카드: 누락/건너뛴 사진과 진행 로그 표시

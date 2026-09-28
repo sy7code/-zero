@@ -55,6 +55,7 @@ Scenario Validation
 - AI/CV는 긴급도를 낮추거나 공식 판단을 대체할 수 없다.
 - `PhotoFacts`의 `unknown`은 `no`가 아니다.
 - 전화는 자동 실행하지 않고 사용자가 직접 버튼을 누를 때만 연결한다.
+- 정식 배포 전 전화 버튼은 실제 112/119가 아니라 데모 번호로만 연결한다.
 - 로그에는 request_id, module, elapsed_ms, rule_id만 남기고 번호판, 전화번호, 상세 주소 원문은 남기지 않는다.
 
 ## Core Sequence: 시작부터 사고 기록 카드까지

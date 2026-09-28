@@ -7,11 +7,13 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
 const _uuid = Uuid();
 const _brandColor = Color(0xffdf4b32);
 const _dangerColor = Color(0xffb42318);
+const _demoEmergencyNumber = '010-0000-0000';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -203,6 +205,13 @@ class _PrototypeHomeState extends State<PrototypeHome> {
     await Share.share(text);
   }
 
+  Future<void> _openDemoEmergencyDialer() async {
+    final uri = Uri(scheme: 'tel', path: _demoEmergencyNumber);
+    _log.add('demo emergency dialer opened: $_demoEmergencyNumber');
+    await _saveState();
+    await launchUrl(uri);
+  }
+
   String _nextActionText() {
     if (_step == 1) return '다친 사람이 있나요?';
     if (_step == 2) return '다른 차량이 관련되어 있나요?';
@@ -368,6 +377,8 @@ class _PrototypeHomeState extends State<PrototypeHome> {
     }
     if (_step == 6) {
       return _EmergencyPanel(
+        demoNumber: _demoEmergencyNumber,
+        onDemoCall: _openDemoEmergencyDialer,
         onContinue: () => setState(() => _step = 4),
       );
     }
@@ -583,8 +594,14 @@ class _CaptureGuide extends StatelessWidget {
 }
 
 class _EmergencyPanel extends StatelessWidget {
-  const _EmergencyPanel({required this.onContinue});
+  const _EmergencyPanel({
+    required this.demoNumber,
+    required this.onDemoCall,
+    required this.onContinue,
+  });
 
+  final String demoNumber;
+  final Future<void> Function() onDemoCall;
   final VoidCallback onContinue;
 
   @override
@@ -611,7 +628,7 @@ class _EmergencyPanel extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  '전화는 자동으로 걸지 않습니다. 사용자가 직접 눌러 연결합니다.',
+                  '정식 배포 전에는 실제 112/119가 아니라 데모 번호로 연결합니다.',
                   style: TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 16),
@@ -620,9 +637,9 @@ class _EmergencyPanel extends StatelessWidget {
                     backgroundColor: Colors.white,
                     foregroundColor: _dangerColor,
                   ),
-                  onPressed: () {},
+                  onPressed: onDemoCall,
                   icon: const Icon(Icons.call),
-                  label: const Text('119 / 112 직접 전화'),
+                  label: Text('데모 번호로 전화: $demoNumber'),
                 ),
               ],
             ),
